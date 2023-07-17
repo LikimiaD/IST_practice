@@ -26,8 +26,8 @@ class MapInterface:
         
     def register_handlers(self, dp: Dispatcher, state: object):
         self.state = state
-        dp.register_message_handler(self.location_keyboard, commands=['location'])
-        dp.register_message_handler(self.send_map, commands=['map'])
+        dp.register_message_handler(self.location_keyboard, lambda msg: msg.text.lower() == 'найти корпус')
+        dp.register_message_handler(self.send_map, lambda msg: msg.text.lower() == 'карта ниту мисис')
 
 class University(Enum):
     building_main = ("Главное", (55.728606736915005, 37.60912654595173))
