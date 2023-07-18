@@ -47,6 +47,7 @@ class QuizInterface:
 
 
 
+
     async def handle_user_answer(self, query: CallbackQuery, state: FSMContext):
         user_answer = query.data
         async with state.proxy() as data:
@@ -55,7 +56,7 @@ class QuizInterface:
                 correct_answer = None
                 for question in self.questions:
                     if question['question'] == current_question:
-                        correct_answer = question['answer']
+                        correct_answer = question['correct_answer']
                         break
 
                 if user_answer == correct_answer:
@@ -82,10 +83,12 @@ class QuizInterface:
                 await query.message.edit_text(question_text, reply_markup=keyboard)
 
 
+
+
     def register_handlers(self, dp: Dispatcher, state: object):
         self.state = state
         self.questions = self.load_questions_from_json()
 
         dp.register_message_handler(self.quizinfo, commands=['quiz'])
         dp.register_callback_query_handler(self.handle_start_command, lambda query: query.data == "start")
-        dp.register_callback_query_handler(self.handle_user_answer, lambda query: query.data in self.questions)
+        dp.register_callback_query_handler(self.handle_user_answer)
