@@ -16,6 +16,7 @@ from cogs.callback import Callback
 from cogs.admin import set_admin_list
 from cogs.user import UserInterface
 from cogs.map import MapInterface
+from cogs.quiz import QuizInterface
 
 @dataclass
 class ITAMBot:
@@ -38,9 +39,14 @@ class ITAMBot:
 
         # Owner(self.bot).register_handlers(self.dp)
         # User().register_handlers(self.dp, self.Form)
-        UserInterface().register_handlers(self.dp, self.Form);
-        MapInterface().register_handlers(self.dp, self.Form)
-        Callback(self.bot).register_handlers(self.dp, self.Form)
+        
+        #класс с квизом реализую его отдельно от всех
+        QuizInterface().register_handlers(self.dp, self.Form)
+        
+        # классы для взаимодействия с пользователем
+        # UserInterface().register_handlers(self.dp, self.Form)
+        # MapInterface().register_handlers(self.dp, self.Form)
+        # Callback(self.bot).register_handlers(self.dp, self.Form)
         
     def start(self):
         executor.start_polling(self.dp, skip_updates=True)
