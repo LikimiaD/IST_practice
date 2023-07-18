@@ -5,10 +5,13 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQu
 from localization import StartDialogue
 from .keyboard import Keyboard
 from dataclasses import dataclass
+from jsonfile import DataHandler
 
 @dataclass
 class UserInterface:
-    board: Keyboard = None;
+    board: Keyboard = None
+    db: DataHandler = DataHandler()
+    
     def __post_init__(self):
         self.board = Keyboard()
         
@@ -19,7 +22,5 @@ class UserInterface:
         await message.answer(text="Загрузил клаву", reply_markup=self.board.user_keyboard)
         
     def register_handlers(self, dp: Dispatcher, state: object):
-        self.state = state
-        
         dp.register_message_handler(self.welcome, commands=['start', 'help'])
         dp.register_message_handler(self.test_key, commands=['test'])
