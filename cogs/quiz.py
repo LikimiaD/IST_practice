@@ -64,23 +64,28 @@ class QuizInterface:
                 else:
                     await query.answer("Неправильный ответ!")
 
-                # Выбор нового случайного вопроса
-                random_question = random.choice(self.questions)
-                question_text = random_question['question']
-                answers = random_question['answers']
-                correct_answer = random.choice(answers)
+                if user_answer == "Выход":
+                    await query.message.edit_text("Вы вышли из викторины.")
+                    await state.finish()
+                else:
+                    # Выбор нового случайного вопроса
+                    random_question = random.choice(self.questions)
+                    question_text = random_question['question']
+                    answers = random_question['answers']
+                    correct_answer = random.choice(answers)
 
-                # Обновление данных в состоянии пользователя
-                data['current_question'] = question_text
-                data['answers'] = answers
-                data['correct_answer'] = correct_answer
+                    # Обновление данных в состоянии пользователя
+                    data['current_question'] = question_text
+                    data['answers'] = answers
+                    data['correct_answer'] = correct_answer
 
-                # Создание новых кнопок ответов
-                buttons = [InlineKeyboardButton(answer, callback_data=answer) for answer in answers]
-                keyboard = InlineKeyboardMarkup().add(*buttons)
+                    # Создание новых кнопок ответов
+                    buttons = [InlineKeyboardButton(answer, callback_data=answer) for answer in answers]
+                    buttons.append(InlineKeyboardButton("Выход", callback_data="Выход"))
+                    keyboard = InlineKeyboardMarkup().add(*buttons)
 
-                # Обновление сообщения с новым вопросом и кнопками
-                await query.message.edit_text(question_text, reply_markup=keyboard)
+                    # Обновление сообщения с новым вопросом и кнопками
+                    await query.message.edit_text(question_text, reply_markup=keyboard)
 
 
 
