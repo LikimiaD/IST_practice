@@ -6,7 +6,7 @@ from aiogram import Bot, Dispatcher, executor
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
-from cogs.callback import Callback
+from cogs.callback import CallbackModule
 from cogs.admin import set_admin_list
 from cogs.user import UserInterface
 from cogs.map import MapInterface
@@ -28,9 +28,9 @@ class ITAMBot:
         storage = MemoryStorage()
         self.dp = Dispatcher(self.bot, storage=storage)
         
-        UserInterface().register_handlers(self.dp, self.Form)
+        UserInterface(self.bot).register_handlers(self.dp, self.Form)
         MapInterface().register_handlers(self.dp, self.Form)
-        Callback(self.bot).register_handlers(self.dp, self.Form)
+        CallbackModule(self.bot).register_handlers(self.dp, self.Form)
         ClubInterface().register_handlers(self.dp, self.Form)
         
     def start(self):

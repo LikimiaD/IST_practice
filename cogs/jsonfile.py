@@ -2,6 +2,7 @@ import json
 import os
 
 FILE_NAME = "data.json"
+
 class DataHandler:
     def __init__(self):
         self.file_name = FILE_NAME
@@ -10,7 +11,7 @@ class DataHandler:
     def load_data(self):
         if not os.path.exists(self.file_name):
             self.create_file()
-        with open(self.file_name, "r") as file:
+        with open(self.file_name, "r", encoding='utf-8') as file:
             try:
                 data = json.load(file)
             except json.JSONDecodeError:
@@ -19,18 +20,21 @@ class DataHandler:
 
     def save_data(self):
         with open(self.file_name, "w") as file:
-            json.dump(self.data, file, indent=4)
+            json.dump(self.data, file, indent=4, ensure_ascii=True)
 
     def create_file(self):
         with open(self.file_name, "w") as file:
             file.write("[]")
 
-    def create_record(self, id: int, name: str, directions: list, score: int):
+    def create_record(self, id: int, name: str = None, directions: list = None, score: int = None):
         for record in self.data:
             if record["id"] == id:
-                record["name"] = name
-                record["directions"] = directions
-                record["score"] = score
+                if name is not None:
+                    record["name"] = name
+                if directions is not None:
+                    record["directions"] = directions
+                if score is not None:
+                    record["score"] = score
                 break
         else:
             new_record = {
@@ -55,7 +59,7 @@ class DataHandler:
 
 if __name__ == "__main__":
     handler = DataHandler()
-    handler.create_record(1, "LikimiaD LikimiaD", ["ITKN", "BISUP"], 1337)
+    handler.create_record(1, "LikimiaD LikimiaD", ["ITKN", "АЛЛО"], 1337)
     handler.save_data()
     record = handler.search_record(1)
     if record:
@@ -65,3 +69,8 @@ if __name__ == "__main__":
         print("Score:", record["score"])
     else:
         print("Record with ID 1 not found")
+    
+    handler.create_record(1, name="New Name")
+    handler.create_record(1, directions=["АХАХАХАХ АХАХАХА"])
+    handler.create_record(1, score=999)
+    handler.save_data()

@@ -6,7 +6,8 @@ class Keyboard():
     user_keyboard: ReplyKeyboardMarkup = None
 
     def __init__(self):
-        user_lst = [KeyboardButton("Клубы", callback_data="Клубы"),
+        user_lst: list = [KeyboardButton("Взять квест", callback_data="Взять квест"),
+                    KeyboardButton("Клубы", callback_data="Клубы"),
                     KeyboardButton("Карта НИТУ МИСИС", callback_data="Карта НИТУ МИСИС"),
                     KeyboardButton("Найти корпус", callback_data="Найти корпус"),
                     KeyboardButton("Профиль", callback_data="Профиль"),]
