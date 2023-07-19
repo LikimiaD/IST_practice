@@ -1,7 +1,7 @@
 from aiogram import Dispatcher, types, Bot
 from aiogram.dispatcher import FSMContext
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
-
+from aiogram.dispatcher.filters.state import State, StatesGroup
 from localization import StartDialogue, Quest
 from .keyboard import Keyboard
 from dataclasses import dataclass
@@ -12,7 +12,7 @@ import random
 @dataclass
 class UserInterface:
     bot: Bot
-    state: object = None #FIX HERE
+    state: object = None
     board: Keyboard = None
     db: DataHandler = DataHandler()
     direction_keyboard: InlineKeyboardMarkup = None
@@ -23,12 +23,18 @@ class UserInterface:
         for location in Directions:
             button = InlineKeyboardButton(location.value, callback_data=location.name)
             self.direction_keyboard.insert(button)
+    
         
-    async def welcome(self, message: types.Message): 
+    async def welcome(self, message: types.Message, state: FSMContext):
         self.db.create_record(id=message.from_user.id)
         self.db.save_data()
-        #self.state.name.set() #FIX HERE
+        await state.set_state(self.state.name)
         await message.answer(text=StartDialogue.welcome.value)
+        await self.state.name.set()
+        
+
+        
+       
     
     async def test_key(self, message: types.Message):
         await message.answer(text="Loaded keyboard", reply_markup=self.board.user_keyboard)
@@ -47,6 +53,7 @@ class UserInterface:
         await message.answer(text=template)
         
     async def echo(self, message: types.Message, state: FSMContext):
+        
         print(message.text, message.from_user.id)
         record = self.db.search_record(message.from_user.id)
         if record:
@@ -56,7 +63,7 @@ class UserInterface:
                 self.db.create_record(id=message.from_user.id, name=message.text)
                 self.db.save_data()
                 await message.answer(StartDialogue.after_name.value, reply_markup=self.direction_keyboard)
-                #await state.finish() #FIX HERE
+                await state.set_state(state.finish)
             elif record["name"] is not None and record["directions"] is not None:
                 id_quest = record["quest"] # need add column
                 id_status = record["quest_status"] # need add column
@@ -72,12 +79,11 @@ class UserInterface:
                         rnd_var = random.randint(1, wrong_vars)
                         message.answer(text=eval(f"Quest.quest{0}_wrong{1}".format(id_quest, rnd_var)))
         
-    def register_handlers(self, dp: Dispatcher, state: object):
-        self.state = state #FIX HERE
-        dp.register_message_handler(self.welcome, commands=['start', 'help'])
+    def register_handlers(self, dp: Dispatcher, state: StatesGroup):
+        self.state = state
+        dp.register_message_handler(self.welcome, commands=['start', 'help'], state=self.state.name)
         dp.register_message_handler(self.test_key, commands=['test'])
-        #dp.register_message_handler(self.echo, state=self.state.name) FIX HERE
-        dp.register_message_handler(self.echo)
+        dp.register_message_handler(self.echo,  state=self.state.name)
         
 class Directions(Enum):
     direction_loshki = "Department of Economics and Management"

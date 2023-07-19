@@ -42,6 +42,7 @@ class DataHandler:
                 "name": name,
                 "directions": directions,
                 "score": score
+                
             }
             self.data.append(new_record)
 

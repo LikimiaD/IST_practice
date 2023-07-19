@@ -6,5 +6,13 @@
             "Institute of Technologies"
         ],
         "score": null
+    },
+    {
+        "id": 789019801,
+        "name": "/start",
+        "directions": [
+            "Institute of New Materials"
+        ],
+        "score": null
     }
 ]

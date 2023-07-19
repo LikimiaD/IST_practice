@@ -28,9 +28,9 @@ class ITAMBot:
         storage = MemoryStorage()
         self.dp = Dispatcher(self.bot, storage=storage)
         
-        UserInterface(self.bot).register_handlers(self.dp, self.Form)
+        UserInterface(bot=self.bot).register_handlers(self.dp, self.Form)
         MapInterface().register_handlers(self.dp, self.Form)
-        CallbackModule(self.bot).register_handlers(self.dp, self.Form)
+        CallbackModule(bot=self.bot).register_handlers(self.dp, self.Form)
         ClubInterface().register_handlers(self.dp, self.Form)
         
     def start(self):
