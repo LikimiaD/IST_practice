@@ -9,9 +9,8 @@ from .map import University
 from .club import ClubInterface
 from localization import Map, Club, StartDialogue
 from .jsonfile import DataHandler
-from .user import Directions
 from .keyboard import Keyboard
-from .user import UserInterface
+
     
 @dataclass
 class CallbackModule:

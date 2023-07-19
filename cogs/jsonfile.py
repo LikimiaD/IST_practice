@@ -26,7 +26,7 @@ class DataHandler:
         with open(self.file_name, "w") as file:
             file.write("[]")
 
-    def create_record(self, id: int, name: str = None, directions: list = None, score: int = None):
+    def create_record(self, id: int, name: str = None, directions: list = None, score: int = None, quest : str = None, quest_status : int = None):
         for record in self.data:
             if record["id"] == id:
                 if name is not None:
@@ -35,14 +35,19 @@ class DataHandler:
                     record["directions"] = directions
                 if score is not None:
                     record["score"] = score
+                if quest is not None:
+                    record["quest"] == quest
+                if quest_status is not None:
+                    record["quest_status"] == quest_status
                 break
         else:
             new_record = {
                 "id": id,
                 "name": name,
                 "directions": directions,
-                "score": score
-                
+                "score": score,
+                "quest": quest,
+                "quest_status": quest_status
             }
             self.data.append(new_record)
 

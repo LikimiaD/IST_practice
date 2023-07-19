@@ -9,7 +9,9 @@ from enum import Enum
 
 @dataclass
 class MapInterface:
-    # ...
+    bot: Bot
+    user_interface: UserInterface
+    state: object = None
 
     async def location_keyboard(self, message: types.Message):
         keyboard = InlineKeyboardMarkup(row_width=5)
@@ -26,8 +28,8 @@ class MapInterface:
         
     def register_handlers(self, dp: Dispatcher, state: object):
         self.state = state
-        dp.register_message_handler(self.location_keyboard, lambda msg: msg.text.lower() == 'найти корпус')
-        dp.register_message_handler(self.send_map, lambda msg: msg.text.lower() == 'карта ниту мисис')
+        dp.register_message_handler(self.location_keyboard, commands=['location'])
+        dp.register_message_handler(self.send_map, commands=['map'])
 
 class University(Enum):
     building_main = ("Главное", (55.728606736915005, 37.60912654595173))
