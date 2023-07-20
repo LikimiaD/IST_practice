@@ -1,13 +1,14 @@
 from aiogram import Dispatcher, types, Bot
 from aiogram.dispatcher import FSMContext
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
-from aiogram.dispatcher.filters.state import State, StatesGroup
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from enum import Enum
+import random
+
 from localization import StartDialogue, Quest
 from .keyboard import Keyboard
 from dataclasses import dataclass
 from .jsonfile import DataHandler
-from enum import Enum
-import random
+
 
 @dataclass
 class UserInterface:
@@ -16,29 +17,25 @@ class UserInterface:
     board: Keyboard = None
     db: DataHandler = DataHandler()
     direction_keyboard: InlineKeyboardMarkup = None
-    
+
     def __post_init__(self):
         self.board = Keyboard()
         self.direction_keyboard = InlineKeyboardMarkup(row_width=1)
         for location in Directions:
             button = InlineKeyboardButton(location.value, callback_data=location.name)
             self.direction_keyboard.insert(button)
-    
-        
+
     async def welcome(self, message: types.Message, state: FSMContext):
+        self.db = DataHandler()
         self.db.create_record(id=message.from_user.id)
         self.db.save_data()
         await state.set_state(self.state.name)
+        print(self.state.name)
         await message.answer(text=StartDialogue.welcome.value)
-        await self.state.name.set()
-        
 
-        
-       
-    
     async def test_key(self, message: types.Message):
         await message.answer(text="Loaded keyboard", reply_markup=self.board.user_keyboard)
-        
+
     async def user_profile(self, message: types.Message):
         record = self.db.search_record(message.from_user.id)
         template = """User Information:\n
@@ -51,40 +48,70 @@ class UserInterface:
                                  *record["directions"],
                                  record["score"])
         await message.answer(text=template)
-        
+
     async def echo(self, message: types.Message, state: FSMContext):
-        
         print(message.text, message.from_user.id)
         record = self.db.search_record(message.from_user.id)
         if record:
-            print(record)
             if record["name"] is None:
-                print("TEST")
+                self.db = DataHandler()
                 self.db.create_record(id=message.from_user.id, name=message.text)
                 self.db.save_data()
                 await message.answer(StartDialogue.after_name.value, reply_markup=self.direction_keyboard)
-                await state.set_state(state.finish)
-            elif record["name"] is not None and record["directions"] is not None:
-                id_quest = record["quest"] # need add column
-                id_status = record["quest_status"] # need add column
-                if (id_status == 0): #need start
-                     message.answer(text=eval(eval(f"Quest.quest{0}_text.format(record[\"nane\"])".format(id_quest))))
-                else:
-                    user_answer = message.text
-                    if (message == eval(f"Quest.quest{0}_correct".format(id_quest))):
-                        message.answer(text=eval(f"Quest.quest{0}_accept".format(id_quest)))
-                        self.db.create_record(id=message.from_user.id, quest=..., quest_status=..., score=...)
+                await state.finish()
+            elif record["quest"] is not None:
+                print("RECORD DETECTED")
+                id_quest = record["quest"]
+                id_status = record["quest_status"]
+                if (id_status == 1):
+                    print(str(eval(f"Quest.quest{id_quest}_correct.value")).lower())
+                    if(message.text.lower() == str(eval(f"Quest.quest{id_quest}_correct.value")).lower()):
+                        print(eval(f"Quest.quest{id_quest}_accept.value"))
+                        await message.answer(eval(f"Quest.quest{id_quest}_accept.value"))
+                        self.db = DataHandler()
+                        self.db.create_record(
+                            id=message.from_user.id,
+                            quest_status=0
+                        )
+                        await state.finish()
                     else:
-                        wrong_vars = eval(f"Quest.quest{0}_wrong_vars".format(id_quest))
-                        rnd_var = random.randint(1, wrong_vars)
-                        message.answer(text=eval(f"Quest.quest{0}_wrong{1}".format(id_quest, rnd_var)))
-        
-    def register_handlers(self, dp: Dispatcher, state: StatesGroup):
+                        vars: int = eval(f"Quest.quest{id_quest}_wrong_vars.value")
+                        choice = random.randint(1,vars)
+                        await message.answer(eval(f"Quest.quest{id_quest}_wrong{choice}.value"))
+                        
+    async def take_quest(self, message: types.Message, state: FSMContext):
+        self.db = DataHandler()
+        print(self.state.name)
+        record = self.db.export_record(id=message.from_user.id)
+        if record:
+            if record["quest_status"] != 1 and record["quest"] < 3:
+                self.db.create_record(id=message.from_user.id, quest=1 if record["quest"] is None else record["quest"] + 1, quest_status=1)
+                self.db.save_data()
+                print(self.state.name)
+            else:
+                if record["quest"] >= 3 and record["quest_status"] == 0:
+                    await message.answer(Quest.quest_empty.value)
+                else:
+                    id_quest = record["quest"]
+                    await message.answer(f"Ты еще не закончил текущий квест, давай я тебе напомню его:\n\n{eval(f'Quest.quest{id_quest}_text.value')}")
+            if (record["quest"] < 3):
+                match record["quest"]:
+                    case 1:
+                        await message.answer(text=Quest.quest1_text.value.format(record["name"]))
+                    case 2:
+                        await message.answer(text=Quest.quest2_text.value)
+                    case 3:
+                        await message.answer(text=Quest.quest3_text.value)
+                await state.set_state(self.state.name)
+
+    def register_handlers(self, dp: Dispatcher, state: object):
         self.state = state
-        dp.register_message_handler(self.welcome, commands=['start', 'help'], state=self.state.name)
+        dp.register_message_handler(self.welcome, commands=['start', 'help'])
         dp.register_message_handler(self.test_key, commands=['test'])
-        dp.register_message_handler(self.echo,  state=self.state.name)
-        
+        dp.register_message_handler(self.echo, state=self.state.name)
+        dp.register_message_handler(self.take_quest, lambda msg: msg.text.lower() == 'взять квест')
+
+
 class Directions(Enum):
     direction_loshki = "Department of Economics and Management"
     direction_gigachad = "Department of Computer Science"

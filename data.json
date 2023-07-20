@@ -1,18 +1,12 @@
 [
     {
         "id": 758844096,
-        "name": null,
+        "name": "Wow",
         "directions": [
-            "Institute of Technologies"
+            "Department of Economics and Management"
         ],
-        "score": null
-    },
-    {
-        "id": 789019801,
-        "name": "/start",
-        "directions": [
-            "Institute of New Materials"
-        ],
-        "score": null
+        "score": null,
+        "quest": 3,
+        "quest_status": 1
     }
 ]

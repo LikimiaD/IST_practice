@@ -39,6 +39,7 @@ class CallbackModule:
                 reply_markup=self.club.club_keyboard
             )
         elif func_name == "direction":
+            self.db = DataHandler()
             self.db.create_record(
                 id=query.from_user.id,
                 directions=[eval(f"Directions.direction_{data}.value")]

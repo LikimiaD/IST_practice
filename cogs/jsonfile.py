@@ -26,8 +26,9 @@ class DataHandler:
         with open(self.file_name, "w") as file:
             file.write("[]")
 
-    def create_record(self, id: int, name: str = None, directions: list = None, score: int = None):
+    def create_record(self, id: int, name: str = None, directions: list = None, score: int = None, quest: str = None, quest_status: int = None):
         for record in self.data:
+            print("REWRITE")
             if record["id"] == id:
                 if name is not None:
                     record["name"] = name
@@ -35,16 +36,24 @@ class DataHandler:
                     record["directions"] = directions
                 if score is not None:
                     record["score"] = score
+                if quest is not None:
+                    record["quest"] = quest
+                if  quest_status is not None:
+                    record["quest_status"] = quest_status
+                self.save_data()
                 break
         else:
+            print("WRITE")
             new_record = {
                 "id": id,
                 "name": name,
                 "directions": directions,
-                "score": score
-                
+                "score": score,
+                "quest": quest,
+                "quest_status": quest_status,
             }
             self.data.append(new_record)
+            self.save_data()
 
     def export_record(self, id):
         for record in self.data:
@@ -61,7 +70,6 @@ class DataHandler:
 if __name__ == "__main__":
     handler = DataHandler()
     handler.create_record(1, "LikimiaD LikimiaD", ["ITKN", "АЛЛО"], 1337)
-    handler.save_data()
     record = handler.search_record(1)
     if record:
         print("ID:", record["id"])
@@ -74,4 +82,3 @@ if __name__ == "__main__":
     handler.create_record(1, name="New Name")
     handler.create_record(1, directions=["АХАХАХАХ АХАХАХА"])
     handler.create_record(1, score=999)
-    handler.save_data()
